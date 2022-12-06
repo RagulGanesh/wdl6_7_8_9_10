@@ -8,6 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./css/style.css">
     <title><%=title%></title>
+    <style>
+        #bt{
+            border-radius: 50px;
+        }
+    </style>
 </head>
 <body>
     <div class="grid grid-cols-6">
@@ -39,7 +44,7 @@
                     <label for="password">Password: </label>
                     <input id="password" type="password" name="password" class="border border-color-300 text-gray-900 rounded p-2 w-full">
                 </div>
-                <button type="submit" class="bg-green-800 text-white hover:bg-green-1000 font-medium rounded px-6 py-3">Sign up</button>
+                <button type="submit" class="bg-green-800 text-white hover:bg-green-1000 font-medium rounded px-6 py-3" id="bt">Sign up</button>
             </form>
             
         </div>

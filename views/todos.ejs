@@ -8,6 +8,11 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="./css/style.css">
     <title><%= title %></title>
+    <style>
+        #bt{
+            border-radius: 50px;
+        }
+    </style>
     <script>
         var token = document.querySelector('meta[name="csrf-token"]').getAttribute("content");
         function deleteATodo(id) {
@@ -54,7 +59,7 @@
                         <input type="date" name="dueDate" class="border border-gray-300 text-gray-900 w-full rounded p-2 text-sm leading-4" />
                     </div>
                     <div class="flex-none">
-                        <button type="submit" class="bg-green-600 text-white px-5 py-1.5 rounded mr-2 mb-2">Add Todo</button>
+                        <button type="submit" id="bt" class="bg-green-600 text-white px-5 py-1.5 rounded mr-2 mb-2">Add Todo</button>
                     </div>
                 </div>
             </form>

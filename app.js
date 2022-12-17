@@ -85,16 +85,25 @@ app.set("view engine", "ejs");
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/", async function (request, response) {
-  response.render("index", {
-    title: "My Todo Manager",
-    csrfToken: request.csrfToken(),
-  });
+  // response.render("index", {
+  //   title: "My Todo Manager",
+  //   csrfToken: request.csrfToken(),
+  // });
+  if (request.user) {
+    return response.redirect("/todos");
+  } else {
+    response.render("index", {
+      title: "My Todo Manager",
+      csrfToken: request.csrfToken(),
+    });
+  }
 });
 
 app.get("/todos",
   connectEnsureLogin.ensureLoggedIn(),
   async function (request, response) {
     try {
+      const userName = request.user.firstName + " " + request.user.lastName;
       const loggedIn = request.user.id;
       const overDue = await Todo.overDue(loggedIn);
       const dueToday = await Todo.dueToday(loggedIn);
@@ -103,6 +112,7 @@ app.get("/todos",
       if (request.accepts("html")) {
         response.render("todos", {
           title: "To-Do Manager",
+          userName,
           overDue,
           dueToday,
           dueLater,
@@ -243,8 +253,9 @@ app.post("/todos",
 app.put("/todos/:id",
   connectEnsureLogin.ensureLoggedIn(),
   async function (request, response) {
-    const todo = await Todo.findByPk(request.params.id);
+    // const todo = await Todo.findByPk(request.params.id);
     try {
+      const todo = await Todo.findByPk(request.params.id);
       const updatedTodoIs = await todo.setCompletionStatusAs(
         request.body.completed
       );

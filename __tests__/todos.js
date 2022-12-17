@@ -174,4 +174,109 @@ describe("My Todo Manager", function () {
     const parsedDeleteResponse21 = JSON.parse(deleteResponse21.text).success;
     expect(parsedDeleteResponse21).toBe(false);
   });
+
+
+  //One of the user cannot mark as complete or incomplete a todo of another user
+  test("One of the user cannot mark as complete or incomplete a todo of another user", async () => {
+    //creating UserA account
+    let res = await agent.get("/signup");
+    let csrfToken = extractCsrfToken(res);
+    res = await agent.post("/users").send({
+      firstName: "test",
+      lastName: "User A",
+      email: "userA@test1.com",
+      password: "123456789",
+      _csrf: csrfToken,
+    });
+    //create Todo from UserA account
+    res = await agent.get("/todos");
+    csrfToken = extractCsrfToken(res);
+    res = await agent.post("/todos").send({
+      title: "Buy A4 size",
+      dueDate: new Date().toISOString(),
+      completed: false,
+      _csrf: csrfToken,
+    });
+    const idOfTodoFromUserA1 = res.id;
+    //Signout UserA
+    await agent.get("/signout");
+    //Create UserB account
+    res = await agent.get("/signup");
+    csrfToken = extractCsrfToken(res);
+    res = await agent.post("/users").send({
+      firstName: "test",
+      lastName: "User B",
+      email: "userB@test2.com",
+      password: "123456",
+      _csrf: csrfToken,
+    });
+    //Try markAsComplete on UserA Todo from UserB account
+    res = await agent.get("/todos");
+    csrfToken = extractCsrfToken(res);
+    const markCompleteResponse = await agent
+      .put(`/todos/${idOfTodoFromUserA1}`)
+      .send({
+        _csrf: csrfToken,
+        completed: true,
+      });
+    expect(markCompleteResponse.statusCode).toBe(422);
+    //Try markAsIncomplete on UserA Todo from UserB account
+    res = await agent.get("/todos");
+    csrfToken = extractCsrfToken(res);
+    const markIncompleteResponse11 = await agent
+      .put(`/todos/${idOfTodoFromUserA1}`)
+      .send({
+        _csrf: csrfToken,
+        completed: false,
+      });
+    expect(markIncompleteResponse11.statusCode).toBe(422);
+  });
+
+  //One of the user can't delete a todo of another user
+  test("One of the user can't delete a todo of another user", async () => {
+    //create UserA account
+    let res = await agent.get("/signup");
+    let csrfToken = extractCsrfToken(res);
+    res = await agent.post("/users").send({
+      firstName: "Test",
+      lastName: "UserC",
+      email: "userC@test.com",
+      password: "12345678",
+      _csrf: csrfToken,
+    });
+
+    //creating a todo from UserA account
+
+    res = await agent.get("/todos");
+    csrfToken = extractCsrfToken(res);
+    res = await agent.post("/todos").send({
+      title: "Sem end next week",
+      dueDate: new Date().toISOString(),
+      completed: false,
+      _csrf: csrfToken,
+    });
+    const idOfTodoFromUserA2 = res.id;
+    //Signing out from UserA
+    await agent.get("/signout");
+    //Creating an UserB account
+    res = await agent.get("/signup");
+    csrfToken = extractCsrfToken(res);
+    res = await agent.post("/users").send({
+      firstName: "Test",
+      lastName: "User D",
+      email: "userD@test.com",
+      password: "12345678",
+      _csrf: csrfToken,
+    });
+
+    //Tring to delete an UserA's Todo from UserB's accounts
+    res = await agent.get("/todos");
+    csrfToken = extractCsrfToken(res);
+    const deleteResponse22 = await agent
+      .delete(`/todos/${idOfTodoFromUserA2}`)
+      .send({
+        _csrf: csrfToken,
+      });
+    expect(deleteResponse22.statusCode).toBe(422);
+  });
 });
